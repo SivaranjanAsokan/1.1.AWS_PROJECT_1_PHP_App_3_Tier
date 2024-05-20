@@ -1,0 +1,74 @@
+sudo yum update -y
+
+sudo amazon-linux-extras install php8.2
+
+sudo yum install -y httpd
+
+sudo systemctl start httpd
+
+sudo systemctl enable httpd
+
+sudo systemctl is-enabled httpd
+
+To set file permissions
+Add your user (in this case, ec2-user) to the apache group.
+
+
+[ec2-user ~]$ sudo usermod -a -G apache ec2-user
+
+Log out and then log back in again to pick up the new group, and then verify your membership.
+
+Log out (use the exit command or close the terminal window):
+
+
+[ec2-user ~]$ exit
+To verify your membership in the apache group, reconnect to your instance, and then run the following command:
+
+
+[ec2-user ~]$ groups
+ec2-user adm wheel apache systemd-journal
+Change the group ownership of /var/www and its contents to the apache group.
+
+
+[ec2-user ~]$ sudo chown -R ec2-user:apache /var/www
+To add group write permissions and to set the group ID on future subdirectories, change the directory permissions of /var/www and its subdirectories.
+
+
+[ec2-user ~]$ sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
+To add group write permissions, recursively change the file permissions of /var/www and its subdirectories:
+
+
+[ec2-user ~]$ find /var/www -type f -exec sudo chmod 0664 {} \;
+Now, ec2-user (and any future members of the apache group) can add, delete, and edit files in the Apache document root, enabling you to add content, such as a static website or a PHP application.
+
+
+
+To install phpMyAdmin
+Install the required dependencies.
+
+
+[ec2-user ~]$ sudo yum install php-mbstring php-xml -y
+Restart Apache.
+
+
+[ec2-user ~]$ sudo systemctl restart httpd
+Restart php-fpm.
+
+
+[ec2-user ~]$ sudo systemctl restart php-fpm
+Navigate to the Apache document root at /var/www/html.
+
+
+[ec2-user ~]$ cd /var/www/html
+Select a source package for the latest phpMyAdmin release from https://www.phpmyadmin.net/downloads. To download the file directly to your instance, copy the link and paste it into a wget command, as in this example:
+
+
+[ec2-user html]$ wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+Create a phpMyAdmin folder and extract the package into it with the following command.
+
+
+[ec2-user html]$ mkdir phpMyAdmin && tar -xvzf phpMyAdmin-latest-all-languages.tar.gz -C phpMyAdmin --strip-components 1
+Delete the phpMyAdmin-latest-all-languages.tar.gz tarball.
+
+
+[ec2-user html]$ rm phpMyAdmin-latest-all-languages.tar.gz
